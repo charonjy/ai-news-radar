@@ -253,6 +253,9 @@ def save_seen(seen):
 
 
 def main():
+    if os.environ.get("GITHUB_ACTIONS") and not os.environ.get("FEISHU_WEBHOOK"):
+        log("还没有配置 FEISHU_WEBHOOK 密钥，本次跳过。配置好后会自动开始工作。")
+        return
     with open(CONFIG_PATH, encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     seen = load_seen()
