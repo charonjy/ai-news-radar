@@ -1,0 +1,41 @@
+name: AI 资讯雷达
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # 每 30 分钟一次（UTC 时间，GitHub 可能延迟几分钟）
+  workflow_dispatch:          # 允许在网页上手动点“Run workflow”
+
+permissions:
+  contents: write   # 保存“已读记录”
+  models: read      # 免费调用 GitHub Models 做 AI 分析
+
+concurrency:
+  group: radar
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: 抓取并推送
+        run: python main.py
+        env:
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+          FEISHU_SECRET: ${{ secrets.FEISHU_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 保存已读记录
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/seen.json 2>/dev/null || exit 0
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: update seen [skip ci]"
+          git pull --rebase -q && git push -q

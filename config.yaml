@@ -1,0 +1,67 @@
+# ============================================================
+#  AI 资讯雷达 · 配置文件
+#  想加/删信息源、调整推送规则，只需要改这个文件。
+#  注意：每行开头的空格要对齐（YAML 对缩进敏感），不要用 Tab。
+# ============================================================
+
+settings:
+  # 只推送 AI 打分 >= 这个值的消息（1~5 分，5 = 重磅）
+  min_score: 3
+  # 只处理最近多少小时内发布的内容（防止翻出很老的旧闻）
+  max_age_hours: 48
+  # 用来做分析总结的模型（GitHub Models 免费额度内）
+  model: "openai/gpt-4.1-mini"
+  # 一张飞书卡片最多放几条
+  items_per_card: 10
+
+# 你关心什么——会告诉 AI，让它据此打分
+interests: |
+  我关注 AI 行业的一手动态，尤其是：
+  - OpenAI / ChatGPT / Codex 的新功能、新模型、额度/限额变化（如 Codex 用量重置）
+  - Anthropic / Claude / Claude Code 的新模型、新版本、重要功能
+  - Google Gemini、xAI Grok 等主流模型商的重大发布
+  - 马斯克（Elon Musk）、Sam Altman 等关键人物关于 AI 的重要言论
+  不太关心：融资八卦、泛泛的评论文章、小版本的 bug 修复。
+
+# ------------------------------------------------------------
+# 信息源列表
+#   name:    显示名称
+#   url:     RSS / Atom 订阅地址
+#   exclude: （可选）标题里含这些词就丢掉，用 | 分隔
+# ------------------------------------------------------------
+sources:
+  # ---- 官方渠道 ----
+  - name: OpenAI 官方博客
+    url: https://openai.com/news/rss.xml
+
+  - name: Anthropic 官方新闻
+    # Anthropic 官网没有 RSS，这是社区维护的转换版
+    url: https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_news.xml
+
+  - name: Google DeepMind 博客
+    url: https://deepmind.google/blog/rss.xml
+
+  # ---- 产品版本发布（GitHub） ----
+  - name: Codex 版本发布
+    url: https://github.com/openai/codex/releases.atom
+    exclude: "alpha|beta|-rc"
+
+  - name: Claude Code 版本发布
+    url: https://github.com/anthropics/claude-code/releases.atom
+
+  # ---- 关键人物（通过新闻聚合间接覆盖 X 上的言论）----
+  - name: 新闻·马斯克谈 AI
+    url: https://news.google.com/rss/search?q=%22Elon+Musk%22+(AI+OR+xAI+OR+Grok)+when:1d&hl=en-US&gl=US&ceid=US:en
+
+  - name: 新闻·Sam Altman
+    url: https://news.google.com/rss/search?q=%22Sam+Altman%22+when:1d&hl=en-US&gl=US&ceid=US:en
+
+  - name: 新闻·Codex / ChatGPT
+    url: https://news.google.com/rss/search?q=(%22OpenAI+Codex%22+OR+ChatGPT)+when:1d&hl=en-US&gl=US&ceid=US:en
+
+  - name: 新闻·Claude / Anthropic
+    url: https://news.google.com/rss/search?q=(Anthropic+OR+%22Claude+Code%22)+when:1d&hl=en-US&gl=US&ceid=US:en
+
+  # ---- 技术社区热帖（100 分以上才收）----
+  - name: Hacker News 热帖
+    url: https://hnrss.org/newest?q=OpenAI+OR+Anthropic+OR+Claude+OR+Codex+OR+ChatGPT+OR+Gemini&points=100
